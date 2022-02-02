@@ -2,7 +2,6 @@ apiVersion: messaging.knative.dev/v1
 kind: Channel
 metadata:
   name: data-channel
-  namespace: eda-poc
 spec: {}
 
 ---
@@ -10,5 +9,4 @@ apiVersion: messaging.knative.dev/v1
 kind: Channel
 metadata:
   name: new-contacts
-  namespace: eda-poc
 spec: {}

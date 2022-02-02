@@ -2,7 +2,6 @@ apiVersion: kafka.strimzi.io/v1beta1
 kind: KafkaUser
 metadata:
   name: developer01
-  namespace: kafka
   labels:
     strimzi.io/cluster: "my-cluster"
 spec:
