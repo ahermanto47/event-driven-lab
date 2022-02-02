@@ -1,0 +1,18 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaUser
+metadata:
+  name: developer01
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: "my-cluster"
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: my-topic
+          patternType: literal
+        operation: All
