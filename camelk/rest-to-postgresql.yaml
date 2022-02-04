@@ -1,0 +1,35 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: rest-to-postgresql
+spec:
+  configuration:
+  - resourceType: config
+    type: secret
+    value: postgresql-datasource
+  dependencies:
+  - mvn:io.quarkus:quarkus-jdbc-postgresql:2.7.0.Final
+  sources:
+  - content: "// kubectl create secret generic postgresql-datasource --from-file=datasource.properties\n//
+      \n// kamel run RestDSL.java -t knative-service.max-scale=3 -t tracing.enabled=true
+      --build-property quarkus.datasource.camel.db-kind=postgresql --config secret:postgresql-datasource
+      -d mvn:io.quarkus:quarkus-jdbc-postgresql:1.13.7.Final\n\nimport org.apache.camel.Exchange;\n\npublic
+      class RestDSL extends org.apache.camel.builder.RouteBuilder {\n    @Override\n
+      \   public void configure() throws Exception {\n\trest()\n\t    .get(\"/\")\n
+      \           .to(\"direct:hello\");\n\n        from(\"direct:hello\")\n            .setHeader(Exchange.CONTENT_TYPE,
+      constant(\"text/plain\"))\n            .transform().simple(\"hello\");\n\n        rest()\n
+      \           .post(\"/contact\")\n            .to(\"direct:insert\");\n\n        from(\"direct:insert\")\n
+      \           .log(\"${body}\")\n            .setHeader(\"id\").jsonpath(\"$.Id\",true)\n
+      \           .setHeader(\"accountId\").jsonpath(\"$.AccountId\",true)\n            .setHeader(\"firstName\").jsonpath(\"$.FirstName\",true)\n
+      \           .setHeader(\"lastName\").jsonpath(\"$.LastName\",true)\n            .setHeader(\"phone\").jsonpath(\"$.Phone\",true)\n
+      \           .setHeader(\"email\").jsonpath(\"$.Email\",true)\n            .setBody(simple(\"insert
+      into sfdc_contact values ('${header.id}', '${header.accountId}', '${header.firstName}',
+      '${header.lastName}', '${header.phone}', '${header.email}')\"))\n            .to(\"jdbc:camel\")\n
+      \           .log(\"insert successful - ${body}\")\n            .setHeader(Exchange.CONTENT_TYPE,
+      constant(\"text/plain\"))\n            .transform().simple(\"success\");\n    }\n}\n\n"
+    name: RestDSL.java
+  traits:
+    builder:
+      configuration:
+        properties:
+        - quarkus.datasource.camel.db-kind = postgresql
